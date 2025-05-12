@@ -2,10 +2,8 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY . .
+COPY translate_worker.py .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install requests
 
-EXPOSE 5000
-
-CMD ["python", "translate_app.py"]
+CMD ["python", "translate_worker.py"]
