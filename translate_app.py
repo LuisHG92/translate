@@ -1,27 +1,38 @@
-from flask import Flask, request, jsonify
 import requests
 
-app = Flask(__name__)
+# Texto a traducir
+TEXT_TO_TRANSLATE = "Hola, ¿cómo estás?"
 
-@app.route("/translate", methods=["POST"])
-def translate():
-    data = request.get_json()
-    text = data.get("text", "")
-    source = data.get("source", "en")
-    target = data.get("target", "es")
-
-    res = requests.post("https://libretranslate.com/translate", data={
+# Función para traducir usando la API pública de LibreTranslate
+def translate(text):
+    url = "https://libretranslate.de/translate"
+    payload = {
         "q": text,
-        "source": source,
-        "target": target,
+        "source": "es",
+        "target": "en",
         "format": "text"
-    })
+    }
 
-    return jsonify(res.json())
+    try:
+        response = requests.post(url, data=payload)
+        response.raise_for_status()
+        result = response.json()
 
-@app.route("/")
-def home():
-    return "Servidor activo. Usa POST /translate para traducir texto."
+        if 'translatedText' in result:
+            return result['translatedText']
+        else:
+            print("❌ Error: 'translatedText' no está en la respuesta.")
+            print("Respuesta completa:", result)
+            return None
+    except Exception as e:
+        print("❌ Error al traducir:", e)
+        return None
 
+# Ejecutar al iniciar
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    print("🚀 Worker de prueba iniciado...")
+    translated = translate(TEXT_TO_TRANSLATE)
+    if translated:
+        print(f"✅ Traducción: {TEXT_TO_TRANSLATE} → {translated}")
+    else:
+        print("⚠️ No se pudo traducir.")
